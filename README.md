@@ -7,5 +7,11 @@
 - 품목·분류 추가 및 편집
 - 재고 현황 Excel·PNG 내보내기
 - 브라우저 로컬 저장소를 이용한 기기별 데이터 보관
+- Android·iPhone 홈 화면 설치를 위한 PWA 아이콘 및 매니페스트
+
+## 홈 화면에 설치
+
+- Galaxy/Android: 앱 상단의 `홈화면 설치` 버튼 또는 브라우저 메뉴의 `앱 설치`를 선택합니다.
+- iPhone/iPad: Safari의 공유 버튼을 누른 뒤 `홈 화면에 추가`를 선택합니다.
 
 배포 주소: https://hkejys9654-tech.github.io/inventory-manager/
