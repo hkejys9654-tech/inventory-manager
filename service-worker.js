@@ -1,4 +1,4 @@
-const CACHE_NAME='inventory-manager-v3';
+const CACHE_NAME='inventory-manager-v4';
 const APP_ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{
