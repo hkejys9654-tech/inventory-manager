@@ -74,6 +74,6 @@ function buildImage(){const S=2,PAD=40,CW=[190,470,170,210],TW=CW.reduce((a,b)=>
 document.getElementById('btnImage').onclick=()=>{try{const cv=buildImage();lastImgURL=cv.toDataURL('image/png');document.getElementById('imgPreview').src=lastImgURL;document.getElementById('imgModal').classList.add('on')}catch(e){toast('이미지를 만들지 못했습니다')}};document.getElementById('btnImgClose').onclick=()=>document.getElementById('imgModal').classList.remove('on');document.getElementById('imgModal').onclick=e=>{if(e.target.id==='imgModal')e.currentTarget.classList.remove('on')};document.getElementById('btnImgSave').onclick=()=>{if(!lastImgURL)return;const a=document.createElement('a');a.href=lastImgURL;a.download=`재고현황_${stamp()}.png`;document.body.appendChild(a);a.click();a.remove();toast('이미지가 저장되었습니다')};
 function render(){renderStock();refreshSelectors();renderLog();const d=new Date(),p=n=>String(n).padStart(2,'0');document.getElementById('dateSub').textContent=`기준 ${BASE_DATE} · 오늘 ${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())}`}boot();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 </script>
-<script src="reports.js"></script>
+<script src="reports.js?v=7"></script>
 </body>
 </html>
