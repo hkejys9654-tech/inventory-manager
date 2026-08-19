@@ -123,6 +123,7 @@
     lastImgURL=cv.toDataURL('image/png');reportDownloadName=fileName;
     document.getElementById('imgModalTitle').textContent=title;
     document.getElementById('imgPreview').src=lastImgURL;
+    document.getElementById('imgSaveHint').textContent=`파일명: ${fileName}\n⬇️ 다운로드 → 파일 앱/내 파일의 다운로드 폴더\n📤 공유/사진 저장 → 사진 앱 또는 원하는 위치 선택`;
     document.getElementById('imgModal').classList.add('on');
   }
   function showLogImage(q){if(!q.entries.length){toast('선택한 기간의 기록이 없습니다');return}openImage(buildLogImage(q),`${q.label} 입출고 기록`,`입출고_${q.suffix}.png`)}
@@ -153,7 +154,30 @@
   document.getElementById('btnLogExcel').onclick=()=>exportLogExcel(currentLogQuery());
   document.getElementById('btnMonthImage').onclick=()=>showLogImage(monthQuery());
   document.getElementById('btnMonthExcel').onclick=()=>exportLogExcel(monthQuery());
-  document.getElementById('btnImgSave').onclick=()=>{if(!lastImgURL)return;const a=document.createElement('a');a.href=lastImgURL;a.download=reportDownloadName||`재고현황_${stamp()}.png`;document.body.appendChild(a);a.click();a.remove();toast('이미지가 저장되었습니다')};
+  function currentImageBlob(){
+    if(!lastImgURL)return null;
+    const [head,data]=lastImgURL.split(','),mime=(head.match(/data:([^;]+)/)||[])[1]||'image/png';
+    const raw=atob(data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+    return new Blob([bytes],{type:mime});
+  }
+  function downloadCurrentImage(){
+    const blob=currentImageBlob();if(!blob)return;
+    const fileName=reportDownloadName||`재고현황_${stamp()}.png`,url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast(`다운로드를 시작했습니다 · ${fileName}`,4500);
+  }
+  async function shareCurrentImage(){
+    const blob=currentImageBlob();if(!blob)return;
+    const fileName=reportDownloadName||`재고현황_${stamp()}.png`,file=new File([blob],fileName,{type:'image/png'});
+    try{
+      if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+        await navigator.share({files:[file],title:document.getElementById('imgModalTitle').textContent});
+        toast('선택한 위치로 이미지 작업을 완료했습니다',3500);
+      }else downloadCurrentImage();
+    }catch(e){if(e.name!=='AbortError'){downloadCurrentImage()}}
+  }
+  document.getElementById('btnImgDownload').onclick=downloadCurrentImage;
+  document.getElementById('btnImgSave').onclick=shareCurrentImage;
 
   const initialLatest=latestDate();
   initDateGroup('io',reportToday());
