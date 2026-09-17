@@ -1,5 +1,5 @@
-const CACHE_NAME='inventory-manager-v9';
-const APP_ASSETS=['./','./index.html','./reports.js?v=9','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
+const CACHE_NAME='inventory-manager-v10';
+const APP_ASSETS=['./','./index.html','./reports.js?v=10','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_ASSETS)));

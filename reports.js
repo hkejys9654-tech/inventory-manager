@@ -90,7 +90,7 @@
     document.getElementById('sTotal').textContent=total;document.getElementById('sRed').textContent=red;document.getElementById('sOrange').textContent=orange;document.getElementById('sGreen').textContent=green;
   }
   function renderEditor(){
-    document.getElementById('editInventoryList').innerHTML=inv.map((c,ci)=>`<div class="editcat"><h4>${esc(c.cat)} · ${c.items.length}개</h4>${c.items.map((it,ii)=>{const level=lvl(it.qty);return `<div class="editrow" id="edit-item-${ci}-${ii}"><div class="rowtop"><div class="itemname">${esc(it.name)}${it.note?`<div class="note">${esc(it.note)}</div>`:''}</div><span class="pill ${level}">${lvlText(level)}</span></div><div class="stepper"><button class="pm minus" onclick="manageBump(${ci},${ii},-1)">−</button><input class="qty" type="number" inputmode="numeric" value="${it.qty}" onchange="manageQty(${ci},${ii},this.value)" onfocus="this.select()"><button class="pm plus" onclick="manageBump(${ci},${ii},1)">＋</button></div><div class="rowtools"><button onclick="manageRename(${ci},${ii})">이름 수정</button><button onclick="manageDelete(${ci},${ii})">품목 삭제</button></div><div class="noteedit"><input type="text" maxlength="50" value="${esc(it.note||'')}" placeholder="비고 입력 (이미지에도 표시)" onfocus="this.select()"><button onclick="manageNote(${ci},${ii},this.previousElementSibling.value)">비고 저장</button></div></div>`}).join('')}</div>`).join('');
+    document.getElementById('editInventoryList').innerHTML=inv.map((c,ci)=>`<div class="editcat"><h4>${esc(c.cat)} · ${c.items.length}개</h4>${c.items.map((it,ii)=>{const level=lvl(it.qty);return `<div class="editrow" id="edit-item-${ci}-${ii}"><div class="rowtop"><div class="itemname">${esc(it.name)}${it.note?`<div class="note">${esc(it.note)}</div>`:''}</div><span class="pill ${level}">${lvlText(level)}</span></div><div class="stepper"><button class="pm minus" onclick="manageBump(${ci},${ii},-1)">−</button><input class="qty" type="number" inputmode="numeric" value="${it.qty}" onchange="manageQty(${ci},${ii},this.value)" onfocus="this.select()"><button class="pm plus" onclick="manageBump(${ci},${ii},1)">＋</button></div><div class="rowtools"><button onclick="manageRename(${ci},${ii})">이름 수정</button><button onclick="manageDelete(${ci},${ii})">품목 삭제</button></div><div class="noteedit"><input type="text" maxlength="50" value="${esc(it.note||'')}" placeholder="앱 내부 비고 입력" onfocus="this.select()"><button onclick="manageNote(${ci},${ii},this.previousElementSibling.value)">비고 저장</button></div></div>`}).join('')}</div>`).join('');
   }
   function openEditor(ci,ii){
     document.querySelector('.tabs button[data-page="edit"]').click();
@@ -113,7 +113,7 @@
   };
 
   function buildLogImage(q){
-    const RH=48,HH=54,TITLE=126,PAD=36,CW=[165,150,365,90,90,260],TW=CW.reduce((a,b)=>a+b,0),summary=q.period==='month'?itemTotals(q.entries):[],SH=48,SRH=46,SECTION=42;
+    const showNotes=!exportSettings.hideNotes,RH=48,HH=54,TITLE=126,PAD=36,CW=showNotes?[165,150,365,90,90,260]:[165,150,625,90,90],TW=CW.reduce((a,b)=>a+b,0),summary=q.period==='month'?itemTotals(q.entries):[],SH=48,SRH=46,SECTION=42;
     const summaryHeight=summary.length?SECTION+SH+SRH*summary.length+22:0,detailTitle=summary.length?SECTION:0,H=TITLE+summaryHeight+detailTitle+HH+RH*q.entries.length+PAD+34,W=TW+PAD*2,S=H>7200?1:2;
     const cv=document.createElement('canvas');cv.width=W*S;cv.height=H*S;const x=cv.getContext('2d');x.scale(S,S);x.fillStyle='#fff';x.fillRect(0,0,W,H);x.textBaseline='middle';x.textAlign='center';
     x.fillStyle='#0f172a';x.font='700 29px "Noto Sans KR",sans-serif';x.fillText('입 출 고 기 록',W/2,42);x.font='700 19px "Noto Sans KR",sans-serif';x.fillStyle='#1d64c4';x.fillText(q.label,W/2,78);
@@ -126,31 +126,31 @@
       summary.forEach((r,row)=>{left=PAD;const vals=[r.cat,r.name,String(r.inQty),String(r.outQty),`${r.net>0?'+':''}${r.net}`];vals.forEach((v,i)=>{x.fillStyle=row%2?'#f8fafc':'#fff';x.fillRect(left,y,SCW[i],SRH);x.strokeStyle='#cbd5e1';x.lineWidth=1;x.strokeRect(left,y,SCW[i],SRH);x.fillStyle=i===2?'#0f9d58':i===3?'#dc3545':i===4?(r.net>0?'#0f9d58':r.net<0?'#dc3545':'#0f172a'):'#0f172a';x.font=i>=2?'700 16px "JetBrains Mono",monospace':'14px "Noto Sans KR",sans-serif';x.fillText(fit(x,String(v),SCW[i]-12),left+SCW[i]/2,y+SRH/2);left+=SCW[i]});y+=SRH});
       y+=22;x.textAlign='left';x.fillStyle='#0f172a';x.font='700 20px "Noto Sans KR",sans-serif';x.fillText(`상세 기록 · ${q.entries.length}건`,PAD,y+SECTION/2);y+=SECTION;x.textAlign='center';
     }
-    const headers=['일자 / 시간','분류','품목','구분','수량','비고'];left=PAD;x.font='700 16px "Noto Sans KR",sans-serif';
+    const headers=showNotes?['일자 / 시간','분류','품목','구분','수량','비고']:['일자 / 시간','분류','품목','구분','수량'];left=PAD;x.font='700 16px "Noto Sans KR",sans-serif';
     headers.forEach((h,i)=>{x.fillStyle='#e8f1fd';x.fillRect(left,y,CW[i],HH);x.strokeStyle='#1d64c4';x.lineWidth=1.4;x.strokeRect(left,y,CW[i],HH);x.fillStyle='#0f172a';x.fillText(h,left+CW[i]/2,y+HH/2);left+=CW[i]});y+=HH;
-    q.entries.forEach((e,row)=>{left=PAD;const vals=[`${prettyDate(recordDate(e))} ${recordTime(e)}`,e.cat,e.name,e.mode==='in'?'입고':'출고',String(e.qty),e.note||''];vals.forEach((v,i)=>{x.fillStyle=row%2?'#f8fafc':'#fff';x.fillRect(left,y,CW[i],RH);x.strokeStyle='#cbd5e1';x.lineWidth=1;x.strokeRect(left,y,CW[i],RH);x.fillStyle=i===3?(e.mode==='in'?'#0f9d58':'#dc3545'):'#0f172a';x.font=i===4?'700 16px "JetBrains Mono",monospace':'14px "Noto Sans KR",sans-serif';x.fillText(fit(x,String(v),CW[i]-12),left+CW[i]/2,y+RH/2);left+=CW[i]});y+=RH});
+    q.entries.forEach((e,row)=>{left=PAD;const vals=[`${prettyDate(recordDate(e))} ${recordTime(e)}`,e.cat,e.name,e.mode==='in'?'입고':'출고',String(e.qty),...(showNotes?[e.note||'']:[])];vals.forEach((v,i)=>{x.fillStyle=row%2?'#f8fafc':'#fff';x.fillRect(left,y,CW[i],RH);x.strokeStyle='#cbd5e1';x.lineWidth=1;x.strokeRect(left,y,CW[i],RH);x.fillStyle=i===3?(e.mode==='in'?'#0f9d58':'#dc3545'):'#0f172a';x.font=i===4?'700 16px "JetBrains Mono",monospace':'14px "Noto Sans KR",sans-serif';x.fillText(fit(x,String(v),CW[i]-12),left+CW[i]/2,y+RH/2);left+=CW[i]});y+=RH});
     x.fillStyle='#94a3b8';x.font='12px "Noto Sans KR",sans-serif';x.textAlign='right';x.fillText('재고관리 앱에서 생성',W-PAD,y+24);return cv;
   }
   let downloadName='';
-  function openImage(cv,title,fileName){lastImgURL=cv.toDataURL('image/png');downloadName=fileName;document.getElementById('imgModalTitle').textContent=title;document.getElementById('imgPreview').src=lastImgURL;document.getElementById('imgSaveHint').textContent=`파일명: ${fileName}\n⬇️ 다운로드 → 파일 앱/내 파일의 다운로드 폴더\n📤 공유/사진 저장 → 사진 앱 또는 원하는 위치 선택`;document.getElementById('imgModal').classList.add('on')}
+  function openImage(cv,title,fileName){lastImgURL=cv.toDataURL('image/png');downloadName=fileName;document.getElementById('imgModalTitle').textContent=title;document.getElementById('imgPreview').src=lastImgURL;document.getElementById('imgSaveHint').textContent=`파일명: ${fileName}\n출력 설정: ${exportSettings.hideNotes?'비고 숨김':'비고 포함'}\n⬇️ 다운로드 → 파일 앱/내 파일의 다운로드 폴더\n📤 공유/사진 저장 → 사진 앱 또는 원하는 위치 선택`;document.getElementById('imgModal').classList.add('on')}
   function showReportImage(q){if(!q.entries.length){toast('선택한 기간의 기록이 없습니다');return}openImage(buildLogImage(q),`${q.label} 입출고 기록`,`입출고_${q.suffix}.png`)}
   function showStockImage(){try{openImage(buildImage(),'전체 재고 현황',`재고현황_${stamp()}.png`)}catch(e){toast('이미지를 만들지 못했습니다')}}
 
   function exportReport(q){
     if(!q.entries.length){toast('선택한 기간의 기록이 없습니다');return}if(typeof XLSX==='undefined'){toast('엑셀 기능을 불러오지 못했습니다');return}
-    const wb=XLSX.utils.book_new();
+    const showNotes=!exportSettings.hideNotes,wb=XLSX.utils.book_new();
     if(q.period==='month'){
       const itemRows=[['분류','품목','입고 합계','출고 합계','순변동']];itemTotals(q.entries).forEach(r=>itemRows.push([r.cat,r.name,r.inQty,r.outQty,r.net]));
       const iws=XLSX.utils.aoa_to_sheet(itemRows);iws['!cols']=[{wch:15},{wch:34},{wch:12},{wch:12},{wch:12}];XLSX.utils.book_append_sheet(wb,iws,'품목별합계');
     }
-    const rows=[['입출고일','등록시간','분류','품목','구분','수량','비고']];q.entries.forEach(e=>rows.push([prettyDate(recordDate(e)),recordTime(e),e.cat,e.name,e.mode==='in'?'입고':'출고',e.qty,e.note||'']));
-    const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:13},{wch:9},{wch:14},{wch:34},{wch:8},{wch:9},{wch:26}];XLSX.utils.book_append_sheet(wb,ws,'입출고기록');const t=totals(q.entries);
+    const rows=[[...['입출고일','등록시간','분류','품목','구분','수량'],...(showNotes?['비고']:[])]];q.entries.forEach(e=>rows.push([prettyDate(recordDate(e)),recordTime(e),e.cat,e.name,e.mode==='in'?'입고':'출고',e.qty,...(showNotes?[e.note||'']:[])]));
+    const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:13},{wch:9},{wch:14},{wch:34},{wch:8},{wch:9},...(showNotes?[{wch:26}]:[])];XLSX.utils.book_append_sheet(wb,ws,'입출고기록');const t=totals(q.entries);
     const sws=XLSX.utils.aoa_to_sheet([['조회 기간',q.label],['입고 건수',t.inCount],['출고 건수',t.outCount],['입고 수량',t.inQty],['출고 수량',t.outQty]]);sws['!cols']=[{wch:16},{wch:20}];XLSX.utils.book_append_sheet(wb,sws,'요약');XLSX.writeFile(wb,`입출고_${q.suffix}.xlsx`);toast(`${q.label} 엑셀이 저장되었습니다`);
   }
   function exportStock(){
-    if(typeof XLSX==='undefined'){toast('엑셀 기능을 불러오지 못했습니다');return}const wb=XLSX.utils.book_new(),a=[['품목','수량','상태','비고']];
-    inv.forEach(c=>{a.push([c.cat,'','','']);c.items.forEach(i=>a.push(['   '+i.name,i.qty,lvlText(lvl(i.qty)),i.note||'']))});const w1=XLSX.utils.aoa_to_sheet(a);w1['!cols']=[{wch:34},{wch:10},{wch:8},{wch:20}];XLSX.utils.book_append_sheet(wb,w1,'재고현황');
-    const b=[['입출고일','등록시간','분류','품목','구분','수량','비고']];sorted(log).forEach(e=>b.push([prettyDate(recordDate(e)),recordTime(e),e.cat,e.name,e.mode==='in'?'입고':'출고',e.qty,e.note||'']));const w2=XLSX.utils.aoa_to_sheet(b);w2['!cols']=[{wch:13},{wch:9},{wch:14},{wch:30},{wch:8},{wch:8},{wch:20}];XLSX.utils.book_append_sheet(wb,w2,'입출고기록');XLSX.writeFile(wb,`재고현황_${stamp()}.xlsx`);toast('전체 재고 엑셀이 저장되었습니다');
+    if(typeof XLSX==='undefined'){toast('엑셀 기능을 불러오지 못했습니다');return}const showNotes=!exportSettings.hideNotes,wb=XLSX.utils.book_new(),a=[[...['품목','수량','상태'],...(showNotes?['비고']:[])]];
+    inv.forEach(c=>{a.push([c.cat,'','',...(showNotes?['']:[])]);c.items.forEach(i=>a.push(['   '+i.name,i.qty,lvlText(lvl(i.qty)),...(showNotes?[i.note||'']:[])]))});const w1=XLSX.utils.aoa_to_sheet(a);w1['!cols']=[{wch:34},{wch:10},{wch:8},...(showNotes?[{wch:20}]:[])];XLSX.utils.book_append_sheet(wb,w1,'재고현황');
+    const b=[[...['입출고일','등록시간','분류','품목','구분','수량'],...(showNotes?['비고']:[])]];sorted(log).forEach(e=>b.push([prettyDate(recordDate(e)),recordTime(e),e.cat,e.name,e.mode==='in'?'입고':'출고',e.qty,...(showNotes?[e.note||'']:[])]));const w2=XLSX.utils.aoa_to_sheet(b);w2['!cols']=[{wch:13},{wch:9},{wch:14},{wch:30},{wch:8},{wch:8},...(showNotes?[{wch:20}]:[])];XLSX.utils.book_append_sheet(wb,w2,'입출고기록');XLSX.writeFile(wb,`재고현황_${stamp()}.xlsx`);toast('전체 재고 엑셀이 저장되었습니다');
   }
   function imageBlob(){if(!lastImgURL)return null;const [head,data]=lastImgURL.split(','),mime=(head.match(/data:([^;]+)/)||[])[1]||'image/png',raw=atob(data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return new Blob([bytes],{type:mime})}
   function downloadImage(){const blob=imageBlob();if(!blob)return;const fileName=downloadName||`재고현황_${stamp()}.png`,url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast(`다운로드를 시작했습니다 · ${fileName}`,4500)}
